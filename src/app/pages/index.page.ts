@@ -1,16 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
-import { tap } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ MarkdownComponent ],
+  imports: [ MarkdownComponent, AsyncPipe ],
   template: `
     <div class="read-the-docs">
       <h1>MarkDown:</h1>
       <div>
-        <analog-markdown [content]="mdContent()"></analog-markdown>
+        <analog-markdown
+          [content]="(mdContent | async)?.content"></analog-markdown>
       </div>
     </div>
   `,
@@ -21,19 +22,7 @@ import { tap } from 'rxjs';
   `,
 })
 export default class HomeComponent {
-  constructor() {
-    injectContent({
-      customFilename: 'test',
-    })
-    .pipe(
-      tap((data) => {
-        console.log(data.content);
-        if (typeof data?.content === 'string') {
-          this.mdContent.set(data.content)
-        }
-      }),
-    )
-    .subscribe();
-  }
-  mdContent = signal<string>('');
+  mdContent = injectContent({
+    customFilename: 'test',
+  })
 }
